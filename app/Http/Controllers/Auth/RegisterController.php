@@ -6,11 +6,9 @@ use App\User;
 use Validator;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\RegistersUsers;
+use Illuminate\Support\Facades\Mail;
 
-/**
- * Class RegisterController
- * @package %%NAMESPACE%%\Http\Controllers\Auth
- */
+
 class RegisterController extends Controller
 {
     /*
@@ -26,12 +24,6 @@ class RegisterController extends Controller
 
     use RegistersUsers;
 
-    /**
-     * Show the application registration form.
-     *
-     * @return \Illuminate\Http\Response
-     */
-
     /*
     public function showRegistrationForm()
     {
@@ -40,18 +32,8 @@ class RegisterController extends Controller
     }
     */
 
-    /**
-     * Where to redirect users after login / registration.
-     *
-     * @var string
-     */
     protected $redirectTo = '/respuesta';
 
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
     public function __construct()
     {
         $this->middleware('guest');
@@ -75,15 +57,13 @@ class RegisterController extends Controller
         ]);
     }
 
-    /**
-     * Create a new user instance after a valid registration.
-     *
-     * @param  array  $data
-     * @return User
-     */
     protected function create(array $data)
     {   
+
         $code = $this->generarCodigo(6);
+        $email = $data['email'];
+        $dates = array('name'=> $data['name'],'code' => $code);
+        $this->Email($dates,$email);
 
         $fields = [
             'name'     => $data['name'],
@@ -98,4 +78,16 @@ class RegisterController extends Controller
         */
         return User::create($fields);
     }
+
+    function Email($dates,$email){
+
+      Mail::send('emails.plantilla',$dates, function($message) use ($email){
+        $message->subject('Bienvenido a la plataforma');
+        $message->to($email);
+        $message->from('no-repply@simulacrosonline.com.co','SimulacrosOnline');
+      });
+
+    }
+
+
 }
